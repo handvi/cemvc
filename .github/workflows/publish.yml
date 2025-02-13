@@ -8,6 +8,7 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -17,20 +18,18 @@ jobs:
         with:
           node-version: 18
           registry-url: "https://registry.npmjs.org/"
-          always-auth: true
 
       - name: Install dependencies
         run: npm install
 
-      - name: Debug Authentication 🔥
-        run: npm whoami
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Authenticate with NPM
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
       - name: Debug NPM Registry 📍
         run: npm config get registry
 
       - name: Publish to NPM 🚀
+
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
