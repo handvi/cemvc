@@ -27,7 +27,10 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish to NPM 🚀B
+      - name: Debug NPM Registry 📍
+        run: npm config get registry
+
+      - name: Publish to NPM 🚀
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
