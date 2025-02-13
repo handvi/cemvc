@@ -1,18 +1,25 @@
 {
   "name": "cemvc",
-  "version": "1.0.3",
-  "description": "Generate an Express MVC structure",
+  "version": "1.0.4",
+  "description": "Generate an Express MVC structure with MySQL or MongoDB",
   "main": "index.js",
   "bin": {
     "cemvc": "index.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1",
+    "readline-sync": "^1.4.10"
   },
   "devDependencies": {
     "nodemon": "^3.0.0"
   },
-  "keywords": ["express", "mvc", "generator"],
+  "keywords": ["express", "mvc", "generator", "mysql", "mongodb"],
   "author": "Han",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/handvi/cemvc.git"
+  }
 }
+
