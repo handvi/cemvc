@@ -12,7 +12,7 @@
     "url": "https://github.com/handvi/cemvc.git"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
+    "access": "public"
   },
   "author": "Han",
   "license": "MIT"
