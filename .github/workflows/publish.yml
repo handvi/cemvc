@@ -21,9 +21,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build project (opsional)
-        run: npm run build
-
       - name: Publish to NPM
         run: npm publish --access public
         env:
