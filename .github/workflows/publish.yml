@@ -17,14 +17,17 @@ jobs:
         with:
           node-version: 18
           registry-url: "https://registry.npmjs.org/"
+          always-auth: true
 
       - name: Install dependencies
         run: npm install
 
-      # - name: Build project (opsional)
-      #   run: npm run build
+      - name: Debug Authentication 🔥
+        run: npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish to NPM
+      - name: Publish to NPM 🚀
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
