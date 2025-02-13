@@ -1,185 +1,230 @@
 #!/usr/bin/env node
 
-const fs = require("fs");
-const path = require("path");
-const { execSync } = require("child_process");
-const readline = require("readline");
+import fs from "fs";
+import path from "path";
+import { execSync } from "child_process";
+import readline from "readline";
+import chalk from "chalk";
+import figlet from "figlet";
+import { fileURLToPath } from "url";
 
-// Prompt user untuk memilih database
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-console.log("\nChoose your database:");
-console.log("1. MySQL (Sequelize)");
-console.log("2. MongoDB (Mongoose)");
+const folders = ["public", "public/css", "public/js", "public/images", "routes", "views", "models", "config", "controllers"];
+const files = {
+  "app.js": `import express from 'express';
+import nunjucks from 'nunjucks';
+import dotenv from 'dotenv';
+import chalk from 'chalk';
 
-rl.question("\nEnter your choice (1/2): ", (choice) => {
-  let selectedDB;
-  let dependencies = ["express", "dotenv"];
-  let dbFileContent = "";
-
-  if (choice === "1") {
-    selectedDB = "MySQL (Sequelize)";
-    dependencies.push("sequelize", "mysql2");
-
-    dbFileContent = `const { Sequelize } = require('sequelize');
-require('dotenv').config();
-
-const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASS, {
-  host: process.env.DB_HOST,
-  dialect: 'mysql'
-});
-
-sequelize.authenticate()
-  .then(() => console.log('✅ Connected to MySQL successfully'))
-  .catch(err => console.error('❌ Unable to connect to MySQL:', err));
-
-module.exports = sequelize;`;
-  } else if (choice === "2") {
-    selectedDB = "MongoDB (Mongoose)";
-    dependencies.push("mongoose");
-
-    dbFileContent = `const mongoose = require('mongoose');
-require('dotenv').config();
-
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('✅ Connected to MongoDB successfully'))
-  .catch(err => console.error('❌ MongoDB connection error:', err));
-
-module.exports = mongoose;`;
-  } else {
-    console.log("❌ Invalid choice. Exiting...");
-    rl.close();
-    process.exit(1);
-  }
-
-  rl.close();
-
-  console.log(`\n📦 Setting up Express MVC with ${selectedDB}...\n`);
-
-  const folders = ["public", "routes", "views", "models", "controllers"];
-  const files = {
-    "app.js": `const express = require('express');
-const path = require('path');
-require('dotenv').config();
+dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static('public'));
 
-const db = require('./models/db');
-const indexRoutes = require('./routes/index');
+nunjucks.configure('views', {
+  autoescape: true,
+  express: app
+});
+
+import indexRoutes from './routes/index.js';
 app.use('/', indexRoutes);
 
 app.listen(port, () => {
-  console.log(\`🚀 Server running on http://localhost:\${port}\`);
+  console.log(chalk.greenBright(\`🚀 Server running on http://localhost:\${port}\`));
 });
 `,
-    "routes/index.js": `const express = require('express');
-const router = express.Router();
-const HomeController = require('../controllers/HomeController');
+  "routes/index.js": `import express from 'express';
+import HomeController from '../controllers/HomeController.js';
 
+const router = express.Router();
 router.get('/', HomeController.index);
 
-module.exports = router;
+export default router;
 `,
-    "controllers/HomeController.js": `const path = require('path');
+  "controllers/HomeController.js": `const HomeController = {
+  index: (req, res) => {
+    res.render('index.njk', { title: 'Welcome to Express MVC' });
+  }
+};
 
-exports.index = (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+export default HomeController;
+`,
+  "models/User.js": `export default class User {
+  constructor(id, name, email) {
+    this.id = id;
+    this.name = name;
+    this.email = email;
+  }
 };
 `,
-    "models/db.js": dbFileContent,
-    ".env": choice === "1" ? `DB_HOST=localhost
-DB_NAME=mydatabase
-DB_USER=root
-DB_PASS=password
-PORT=3000` : `MONGO_URI=mongodb://localhost:27017/mydatabase
-PORT=3000`,
-    "public/index.html": `<!DOCTYPE html>
-<html lang="en">
+  "views/index.njk": `<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Express MVC</title>
-    <link rel="stylesheet" href="/css/style.css">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome to Express MVC</h1>
-        <p>This is a simple MVC structure for Express.js</p>
-        <a href="/docs">Read the Documentation</a>
-    </div>
+  <div class="welcome-card">
+    <h1>🚀 Welcome to CEMVC</h1>
+    <p>Your Express MVC framework generator, making development easier and more structured.</p>
+    <a href="#" class="doc-button">Read the Documentation</a>
+  </div>
 </body>
 </html>`,
-    "public/css/style.css": `body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background-color: #f4f4f4;
-    padding: 50px;
+  "public/css/style.css": `body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: #f4f4f4;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
 }
 
-.container {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    display: inline-block;
-}`
-  };
+.welcome-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 400px;
+}
 
-  function createProject(projectName) {
-    const projectPath = path.join(process.cwd(), projectName);
-    if (fs.existsSync(projectPath)) {
-      console.error("❌ Project folder already exists!");
-      process.exit(1);
-    }
+.doc-button {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 20px;
+  text-decoration: none;
+  color: white;
+  background: #007BFF;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
 
-    fs.mkdirSync(projectPath);
-    process.chdir(projectPath);
+.doc-button:hover {
+  background: #0056b3;
+}`,
+  "public/js/script.js": `console.log("Welcome to Express MVC");`
+};
 
-    folders.forEach((folder) => fs.mkdirSync(folder));
-    Object.entries(files).forEach(([file, content]) => {
-      const filePath = path.join(projectPath, file);
-      fs.mkdirSync(path.dirname(filePath), { recursive: true });
-      fs.writeFileSync(filePath, content);
-    });
-
-    // Generate package.json
-    const packageJson = {
-      name: projectName,
-      version: "1.0.0",
-      description: "Express MVC Project",
-      main: "app.js",
-      scripts: {
-        start: "node app.js",
-        dev: "nodemon app.js"
-      },
-      dependencies: {},
-      devDependencies: {
-        nodemon: "^3.0.0"
-      }
-    };
-
-    dependencies.forEach(dep => {
-      packageJson.dependencies[dep] = "latest";
-    });
-
-    fs.writeFileSync("package.json", JSON.stringify(packageJson, null, 2));
-
-    console.log("\n📦 Installing dependencies...");
-
-    // Install dependencies
-    execSync("npm install", { stdio: "inherit" });
-
-    console.log("\n✅ Setup complete!");
-    console.log("\n🚀 Run 'npm run dev' to start the development server with nodemon.");
+function createProject(projectName, dbChoice) {
+  const projectPath = path.join(process.cwd(), projectName);
+  if (fs.existsSync(projectPath)) {
+    console.error(chalk.red.bold("❌ Project folder already exists!"));
+    process.exit(1);
   }
 
-  const projectName = process.argv[2] || "my-express-app";
-  createProject(projectName);
+  fs.mkdirSync(projectPath);
+  process.chdir(projectPath);
+
+  folders.forEach((folder) => fs.mkdirSync(folder, { recursive: true }));
+
+  Object.entries(files).forEach(([file, content]) => {
+    fs.writeFileSync(file, content);
+  });
+
+  const dbConfig = dbChoice === "mysql" ? `import { Sequelize } from 'sequelize';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const sequelize = new Sequelize(
+  process.env.DB_DATABASE,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    dialect: 'mysql'
+  }
+);
+
+export default sequelize;` : `import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+dotenv.config();
+
+mongoose.connect(process.env.DB_HOST, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+
+export default mongoose;`;
+
+fs.writeFileSync("config/db.js", dbConfig);
+
+  console.log(chalk.yellowBright("\n📦 Generating package.json..."));
+
+  const packageJson = {
+    name: projectName,
+    version: "1.0.0",
+    description: "Express MVC project",
+    main: "app.js",
+    type: "module",
+    scripts: {
+      start: "node app.js",
+      dev: "nodemon app.js"
+    },
+    dependencies: {
+      express: "^4.18.2",
+      nunjucks: "^3.2.4",
+      dotenv: "^16.3.1",
+      chalk: "^5.3.0",
+      figlet: "^1.5.2"
+    },
+    devDependencies: {
+      nodemon: "^3.0.0"
+    }
+  };
+
+  if (dbChoice === "mysql") {
+    packageJson.dependencies.sequelize = "^6.32.1";
+    packageJson.dependencies.mysql2 = "^3.9.1";
+  } else if (dbChoice === "mongo") {
+    packageJson.dependencies.mongoose = "^7.6.3";
+  }
+
+  fs.writeFileSync("package.json", JSON.stringify(packageJson, null, 2));
+
+  console.log(chalk.green("\n📦 Installing dependencies...\n"));
+
+  try {
+    execSync("npm install", { stdio: "inherit" });
+    console.log(chalk.greenBright("\n✅ Express MVC Project Created Successfully!\n"));
+    console.log(chalk.blueBright("👉 To start your project:"));
+    console.log(chalk.yellow(`   cd ${projectName}`));
+    console.log(chalk.yellow("   npm run dev"));
+    console.log("\n🎉 Happy coding!\n");
+  } catch (error) {
+    console.error(chalk.red("❌ Failed to install dependencies. Please install manually with 'npm install'"));
+  }
+}
+
+function askDatabaseChoice(callback) {
+  console.clear();
+  console.log(chalk.blueBright(figlet.textSync("CEMVC", { horizontalLayout: "full" })));
+  console.log(chalk.greenBright("🚀 Welcome to CEMVC - Express MVC Generator\n"));
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  rl.question(chalk.yellow("🔍 Choose database (mysql/mongo): "), (dbChoice) => {
+    dbChoice = dbChoice.toLowerCase();
+    if (dbChoice !== "mysql" && dbChoice !== "mongo") {
+      console.log(chalk.red("⚠️ Invalid choice! Defaulting to MySQL..."));
+      dbChoice = "mysql";
+    }
+    rl.close();
+    callback(dbChoice);
+  });
+}
+
+const projectName = process.argv[2] || "my-express-app";
+askDatabaseChoice((dbChoice) => {
+  createProject(projectName, dbChoice);
 });
