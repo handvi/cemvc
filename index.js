@@ -62,55 +62,6 @@ export default HomeController;
   }
 };
 `,
-  "views/index.njk": `<html>
-<head>
-  <title>{{ title }}</title>
-  <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
-  <div class="welcome-card">
-    <h1>🚀 Welcome to CEMVC</h1>
-    <p>Your Express MVC framework generator, making development easier and more structured.</p>
-    <a href="#" class="doc-button">Read the Documentation</a>
-  </div>
-</body>
-</html>`,
-  "public/css/style.css": `body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  background: #f4f4f4;
-  color: #333;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
-}
-
-.welcome-card {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  max-width: 400px;
-}
-
-.doc-button {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 10px 20px;
-  text-decoration: none;
-  color: white;
-  background: #007BFF;
-  border-radius: 5px;
-  transition: background 0.3s ease;
-}
-
-.doc-button:hover {
-  background: #0056b3;
-}`,
-  "public/js/script.js": `console.log("Welcome to Express MVC");`
 };
 
 function createProject(projectName, dbChoice) {
@@ -124,80 +75,15 @@ function createProject(projectName, dbChoice) {
   process.chdir(projectPath);
 
   folders.forEach((folder) => fs.mkdirSync(folder, { recursive: true }));
-
   Object.entries(files).forEach(([file, content]) => {
     fs.writeFileSync(file, content);
   });
-
-  const dbConfig = dbChoice === "mysql" ? `import { Sequelize } from 'sequelize';
-import dotenv from 'dotenv';
-dotenv.config();
-
-const sequelize = new Sequelize(
-  process.env.DB_DATABASE,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host: process.env.DB_HOST,
-    dialect: 'mysql'
-  }
-);
-
-export default sequelize;` : `import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-dotenv.config();
-
-mongoose.connect(process.env.DB_HOST, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
-
-export default mongoose;`;
-
-fs.writeFileSync("config/db.js", dbConfig);
-
-  console.log(chalk.yellowBright("\n📦 Generating package.json..."));
-
-  const packageJson = {
-    name: projectName,
-    version: "1.0.0",
-    description: "Express MVC project",
-    main: "app.js",
-    type: "module",
-    scripts: {
-      start: "node app.js",
-      dev: "nodemon app.js"
-    },
-    dependencies: {
-      express: "^4.18.2",
-      nunjucks: "^3.2.4",
-      dotenv: "^16.3.1",
-      chalk: "^5.3.0",
-      figlet: "^1.5.2"
-    },
-    devDependencies: {
-      nodemon: "^3.0.0"
-    }
-  };
-
-  if (dbChoice === "mysql") {
-    packageJson.dependencies.sequelize = "^6.32.1";
-    packageJson.dependencies.mysql2 = "^3.9.1";
-  } else if (dbChoice === "mongo") {
-    packageJson.dependencies.mongoose = "^7.6.3";
-  }
-
-  fs.writeFileSync("package.json", JSON.stringify(packageJson, null, 2));
 
   console.log(chalk.green("\n📦 Installing dependencies...\n"));
 
   try {
     execSync("npm install", { stdio: "inherit" });
     console.log(chalk.greenBright("\n✅ Express MVC Project Created Successfully!\n"));
-    console.log(chalk.blueBright("👉 To start your project:"));
-    console.log(chalk.yellow(`   cd ${projectName}`));
-    console.log(chalk.yellow("   npm run dev"));
-    console.log("\n🎉 Happy coding!\n");
   } catch (error) {
     console.error(chalk.red("❌ Failed to install dependencies. Please install manually with 'npm install'"));
   }
