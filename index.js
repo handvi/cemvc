@@ -16,6 +16,7 @@ const folders = [
   "routes", "views", "models", "config", "controllers"
 ];
 
+
 const files = {
   "app.js": `import express from 'express';
 import nunjucks from 'nunjucks';
@@ -66,8 +67,21 @@ export default HomeController;
     this.email = email;
   }
 }
+`,
+
+  "views/index.njk": `<html>
+<head>
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1>{{ title }}</h1>
+  <p>Welcome to your Express MVC project!</p>
+</body>
+</html>
 `
 };
+
 
 function createEnvFile(projectPath, dbChoice) {
   const envPath = path.join(projectPath, ".env");
@@ -83,6 +97,7 @@ function createEnvFile(projectPath, dbChoice) {
   }
 }
 
+
 function createProject(projectName, dbChoice) {
   const projectPath = path.join(process.cwd(), projectName);
   if (fs.existsSync(projectPath)) {
@@ -94,6 +109,7 @@ function createProject(projectName, dbChoice) {
 
   fs.mkdirSync(projectPath, { recursive: true });
 
+ 
   folders.forEach((folder) => {
     try {
       fs.mkdirSync(path.join(projectPath, folder), { recursive: true });
@@ -112,6 +128,27 @@ function createProject(projectName, dbChoice) {
 
   createEnvFile(projectPath, dbChoice);
 
+ 
+  const packageJson = {
+    name: projectName,
+    version: "1.0.0",
+    description: "A simple Express MVC application",
+    type: "module",
+    main: "app.js",
+    scripts: {
+      dev: "node app.js",
+      start: "node app.js"
+    },
+    dependencies: {}
+  };
+
+  try {
+    fs.writeFileSync(path.join(projectPath, "package.json"), JSON.stringify(packageJson, null, 2), "utf8");
+    console.log(chalk.green("✅ package.json created successfully!"));
+  } catch (error) {
+    console.error(chalk.red(`❌ Error creating package.json:`, error.message));
+  }
+
   console.log(chalk.green("\n📦 Installing dependencies...\n"));
 
   try {
@@ -121,6 +158,7 @@ function createProject(projectName, dbChoice) {
     console.error(chalk.red("❌ Failed to install dependencies. Please install manually with 'npm install'"));
   }
 }
+
 
 function askDatabaseChoice(callback) {
   console.clear();
@@ -142,6 +180,7 @@ function askDatabaseChoice(callback) {
     callback(dbChoice);
   });
 }
+
 
 const projectName = process.argv[2] || "my-express-app";
 askDatabaseChoice((dbChoice) => {
