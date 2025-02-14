@@ -1,6 +1,6 @@
 {
   "name": "cemvc",
-  "version": "1.1.6",
+  "version": "1.2.0",
   "description": "Generate an Express MVC structure",
   "main": "index.js",
   "bin": {
@@ -12,9 +12,14 @@
     "url": "https://github.com/handvi/cemvc.git"
   },
   "publishConfig": {
-  "registry": "https://registry.npmjs.org/"
-},
-
+    "registry": "https://registry.npmjs.org/"
+  },
   "author": "Han",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "nunjucks": "^3.2.4"
+  }
 }
