@@ -110,7 +110,7 @@ if (useMongo) {
   <div class="container">
     <div class="card">
       <h1>{{ title }}</h1>
-      <p>Welcome to your Express MVC project!</p>
+      <p>🚀 Welcome to your Express MVC project!</p>
       <button class="btn">Read Documentation</button>
     </div>
   </div>
