@@ -211,7 +211,7 @@ function createProject(projectName, dbChoice) {
       start: "node app.js"
     },
   dependencies: {
-    express: "^4.18.2",
+    express: "^5.0.1",
     nunjucks: "^3.2.4",
     dotenv: "^16.3.1",
     chalk: "^5.3.0",
