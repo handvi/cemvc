@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
 
 const folders = [
   "public", "public/css", "public/js", "public/images",
-  "routes", "views", "models", "config", "controllers"
+  "routes", "views", "models", "config", "controllers", "utils", "middlewares"
 ];
 
 
@@ -69,17 +69,88 @@ export default HomeController;
 }
 `,
 
+  "config/db.js": `import dotenv from 'dotenv';
+dotenv.config();
+import mongoose from 'mongoose';
+import mysql from 'mysql2';
+
+const useMongo = process.env.DB_URI !== undefined;
+
+if (useMongo) {
+  mongoose.connect(process.env.DB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
+  .then(() => console.log('✅ Connected to MongoDB'))
+  .catch(err => console.error('❌ MongoDB Connection Error:', err));
+} else {
+  const db = mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME
+  });
+
+  db.connect(err => {
+    if (err) {
+      console.error('❌ MySQL Connection Error:', err);
+    } else {
+      console.log('✅ Connected to MySQL');
+    }
+  });
+}
+`,
+
   "views/index.njk": `<html>
 <head>
   <title>{{ title }}</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <h1>{{ title }}</h1>
-  <p>Welcome to your Express MVC project!</p>
+  <div class="container">
+    <div class="card">
+      <h1>{{ title }}</h1>
+      <p>Welcome to your Express MVC project!</p>
+      <button class="btn">Read Documentation</button>
+    </div>
+  </div>
 </body>
 </html>
-`
+`,
+
+  "public/css/style.css": `body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f4f4f4;
+}
+
+.container {
+  text-align: center;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn {
+  background: #007BFF;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.btn:hover {
+  background: #0056b3;
+}`
 };
 
 
@@ -139,7 +210,17 @@ function createProject(projectName, dbChoice) {
       dev: "node app.js",
       start: "node app.js"
     },
-    dependencies: {}
+  dependencies: {
+    express: "^4.18.2",
+    nunjucks: "^3.2.4",
+    dotenv: "^16.3.1",
+    chalk: "^5.3.0",
+    figlet: "^1.5.2",
+    mongoose: "^7.6.3"
+  },
+  devDependencies: {
+    nodemon: "^3.0.0"
+  }
   };
 
   try {
