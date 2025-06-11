@@ -1,6 +1,6 @@
 {
   "name": "cemvc",
-  "version": "1.2.11",
+  "version": "1.2.12",
   "description": "Generate an Express MVC structure",
   "main": "index.js",
   "bin": {
