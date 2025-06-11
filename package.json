@@ -1,6 +1,6 @@
 {
-  "name": "cemvc", 
-  "version": "1.2.13",  
+  "name": "cemvc",
+  "version": "1.2.14",
   "description": "Generate an Express MVC structure",
   "main": "index.js",
   "bin": {
@@ -11,7 +11,6 @@
     "type": "git",
     "url": "https://github.com/handvi/cemvc.git"
   },
- 
   "author": "Han",
   "license": "MIT",
   "dependencies": {
