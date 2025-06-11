@@ -1,34 +1,58 @@
-name: Publish to NPM
+# .github/workflows/publish.yml
+name: Publish CLI to npmjs and GitHub Packages # Nama workflow lebih deskriptif
 
 on:
   push:
     branches:
-      - main
+      - main # Workflow akan berjalan saat ada push ke branch 'main'
+    paths:
+      - 'package.json' # Hanya jalankan jika package.json berubah
+  release:
+    types: [created] # Opsional: juga jalankan saat rilis baru dibuat di GitHub (disarankan untuk rilis)
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # <--- PENTING: Izin ini diperlukan untuk GitHub Packages!
+      id-token: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4 # Gunakan versi terbaru
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Set up Node.js for npmjs.org publish
+        uses: actions/setup-node@v4 # Gunakan versi terbaru
         with:
-          node-version: 18
-          registry-url: "https://registry.npmjs.org/"
+          node-version: '20' # Rekomendasi: Gunakan versi LTS terbaru, misal 20
+          registry-url: 'https://registry.npmjs.org/' # Targetkan npmjs.org
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # Auth token dari GitHub Secrets
 
       - name: Install dependencies
         run: npm install
 
-      - name: Authenticate with NPM
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-
-      - name: Debug NPM Registry 📍
-        run: npm config get registry
-
-      - name: Publish to NPM 🚀
+      - name: Publish to npmjs.org (unscoped) 🚀
         run: npm publish --access public
+
+      # --- PUBLISH KE GITHUB PACKAGES (SCOPED) ---
+      # Ini adalah bagian baru yang tidak ada di workflow Anda sebelumnya
+      - name: Set up Node.js for GitHub Packages publish
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://npm.pkg.github.com/' # <--- Penting: Setel ke GitHub Packages
+          scope: '@handvi' # <--- Penting: Sesuaikan dengan username GitHub Anda
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Menggunakan GITHUB_TOKEN bawaan GitHub
+
+      - name: Publish to GitHub Packages (scoped) 📦
+        run: |
+          # Ubah nama paket di package.json secara sementara untuk publikasi ke GitHub Packages
+          # Ini memastikan paket terdaftar dengan nama scoped (@handvi/cemvc)
+          node -e "const pkg = require('./package.json'); pkg.name = '@handvi/cemvc'; require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2));"
+          # Publikasikan paket ke GitHub Packages
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Menggunakan GITHUB_TOKEN bawaan GitHub
